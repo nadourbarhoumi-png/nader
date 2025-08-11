@@ -1,7 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { BarChart3, TrendingUp, Newspaper, Shield, Settings, Zap, PieChart, Activity, Globe } from "lucide-react"
+import {
+  BarChart3,
+  TrendingUp,
+  Newspaper,
+  Shield,
+  Settings,
+  Zap,
+  PieChart,
+  Activity,
+  Globe,
+  CheckCircle,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -10,6 +21,7 @@ const navigation = [
   { name: "Dashboard", icon: BarChart3, href: "/", current: true },
   { name: "Technical Analysis", icon: TrendingUp, href: "/technical", current: false },
   { name: "AI Signals", icon: Zap, href: "/ai-signals", current: false },
+  { name: "Decisions", icon: CheckCircle, href: "/decisions", current: false },
   { name: "Portfolio", icon: PieChart, href: "/portfolio", current: false },
   { name: "Market News", icon: Newspaper, href: "/news", current: false },
   { name: "Risk Management", icon: Shield, href: "/risk", current: false },
