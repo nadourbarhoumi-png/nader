@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Trading Platform - Professional Trading Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Added Chart.js for functional charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -97,16 +99,13 @@
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-lg font-semibold">AAPL - Apple Inc.</h2>
                             <div class="flex items-center space-x-2">
-                                <span class="text-2xl font-bold text-green-400">$175.43</span>
-                                <span class="text-green-400">+2.34 (+1.35%)</span>
+                                <span class="text-2xl font-bold text-green-400" id="currentPrice">$175.43</span>
+                                <span class="text-green-400" id="priceChange">+2.34 (+1.35%)</span>
                             </div>
                         </div>
-                        <div class="h-96 bg-slate-800 rounded-lg flex items-center justify-center">
-                            <div class="text-center text-slate-400">
-                                <div class="text-4xl mb-2">📈</div>
-                                <p>Interactive Trading Chart</p>
-                                <p class="text-sm">(Requires React components for full functionality)</p>
-                            </div>
+                        <!-- Replaced placeholder with functional Chart.js canvas -->
+                        <div class="h-96 bg-slate-800 rounded-lg p-4">
+                            <canvas id="tradingChart" width="400" height="300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -125,6 +124,13 @@
                             <div class="flex justify-between">
                                 <span class="text-slate-400">Available Cash</span>
                                 <span>$25,000.00</span>
+                            </div>
+                        </div>
+                        <!-- Added portfolio allocation chart -->
+                        <div class="mt-6">
+                            <h4 class="text-sm font-semibold mb-2 text-slate-400">Portfolio Allocation</h4>
+                            <div class="h-48">
+                                <canvas id="portfolioChart" width="200" height="200"></canvas>
                             </div>
                         </div>
                     </div>
@@ -260,5 +266,156 @@
             </div>
         </main>
     </div>
+
+    <!-- Added JavaScript for functional charts with live data simulation -->
+    <script>
+        // Trading Chart Configuration
+        const ctx = document.getElementById('tradingChart').getContext('2d');
+        
+        // Generate realistic AAPL price data
+        function generatePriceData() {
+            const data = [];
+            const labels = [];
+            let basePrice = 173.50;
+            
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date();
+                date.setMinutes(date.getMinutes() - i * 5);
+                labels.push(date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+                
+                // Simulate realistic price movement
+                const change = (Math.random() - 0.5) * 2;
+                basePrice += change;
+                data.push(basePrice.toFixed(2));
+            }
+            
+            return { labels, data };
+        }
+
+        const priceData = generatePriceData();
+        
+        const tradingChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: priceData.labels,
+                datasets: [{
+                    label: 'AAPL Price',
+                    data: priceData.data,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#94a3b8'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#64748b'
+                        },
+                        grid: {
+                            color: '#334155'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#64748b',
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        },
+                        grid: {
+                            color: '#334155'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Portfolio Chart
+        const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+        const portfolioChart = new Chart(portfolioCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'Cash'],
+                datasets: [{
+                    data: [25, 20, 15, 12, 18, 10],
+                    backgroundColor: [
+                        '#3b82f6',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#8b5cf6',
+                        '#6b7280'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            padding: 10,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Live price updates simulation
+        function updateLivePrice() {
+            const currentPriceElement = document.getElementById('currentPrice');
+            const priceChangeElement = document.getElementById('priceChange');
+            
+            const currentPrice = parseFloat(currentPriceElement.textContent.replace('$', ''));
+            const change = (Math.random() - 0.5) * 0.5;
+            const newPrice = (currentPrice + change).toFixed(2);
+            const priceChange = (newPrice - 175.43).toFixed(2);
+            const percentChange = ((priceChange / 175.43) * 100).toFixed(2);
+            
+            currentPriceElement.textContent = '$' + newPrice;
+            
+            if (priceChange >= 0) {
+                priceChangeElement.textContent = '+$' + priceChange + ' (+' + percentChange + '%)';
+                priceChangeElement.className = 'text-green-400';
+            } else {
+                priceChangeElement.textContent = '$' + priceChange + ' (' + percentChange + '%)';
+                priceChangeElement.className = 'text-red-400';
+            }
+            
+            // Update chart with new data point
+            const now = new Date();
+            tradingChart.data.labels.push(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+            tradingChart.data.datasets[0].data.push(newPrice);
+            
+            // Keep only last 30 data points
+            if (tradingChart.data.labels.length > 30) {
+                tradingChart.data.labels.shift();
+                tradingChart.data.datasets[0].data.shift();
+            }
+            
+            tradingChart.update('none');
+        }
+
+        // Update price every 3 seconds
+        setInterval(updateLivePrice, 3000);
+    </script>
 </body>
 </html>
